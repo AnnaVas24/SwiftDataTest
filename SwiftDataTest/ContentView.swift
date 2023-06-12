@@ -6,16 +6,45 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var tasks: [Task]
+    
+    @State private var taskName = ""
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack {
+                HStack {
+                    TextField("Enter the task", text: $taskName)
+                        .textFieldStyle(.roundedBorder)
+                    
+                    Button("Save") {
+                        let task = Task(name: taskName)
+                        modelContext.insert(task)
+                        taskName = "" 
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                List(tasks) { task in
+                    Text(task.name)
+                        .swipeActions {
+                            Button("Delete", role: .destructive) {
+                                modelContext.delete(task)
+                            }
+                            Button("Update") {
+                                task.name = "Another task"
+                            }
+                        }
+                }
+                
+                
+            }
+            .navigationTitle("Tasks")
+            .padding()
         }
-        .padding()
     }
 }
 
